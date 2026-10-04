@@ -1,0 +1,158 @@
+---
+title: "APM1110_FA7_DeRamos_AneezaAnn_and_Eduvala_Mikhael"
+author: "Aneeza Ann de Ramos and Mikhael Eduvala"
+date: "2026-09-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+github link: https://github.com/AneezaAnn/APM1110_FA7_DeRamos_AneezaAnn_and_Eduvala_Mikhael.git
+
+**The chosen scenario is how long one student tries entering the gate when their Face ID won't work at FEU gate 3. Here are the gathered data:**
+
+1. 1 minute 23 seconds (83 seconds)
+
+2. 0 minutes 54 seconds (54 seconds)
+
+3. 0 minutes 51 seconds (51 seconds)
+
+4. 1 minute 6 seconds (66 seconds)
+
+5. 1 minute 21 seconds (81 seconds)
+
+6. 0 minutes 42 seconds (42 seconds)
+
+7. 0 minutes 24 seconds (24 seconds)
+
+8. 0 minutes 38 seconds (38 seconds)
+
+9. 0 minutes 26 seconds (26 seconds)
+
+10. 0 minutes 31 seconds (31 seconds)
+
+11. 0 minutes 52 seconds (52 seconds)
+
+12. 0 minutes 17 seconds (17 seconds)
+
+13. 0 minutes 48 seconds (48 seconds)
+
+14. 0 minutes 22 seconds (22 seconds)
+
+15. 0 minutes 10 seconds (10 seconds)
+
+16. 1 minute 2 seconds (62 seconds)
+
+17. 0 minutes 26 seconds (26 seconds)
+
+18. 0 minutes 17 seconds (17 seconds)
+
+19. 0 minutes 12 seconds (12 seconds)
+
+20. 0 minutes 24 seconds (24 seconds)
+
+21. 0 minutes 35 seconds (35 seconds)
+
+22. 0 minutes 27 seconds (27 seconds)
+
+23. 0 minutes 20 seconds (20 seconds)
+
+24. 0 minutes 16 seconds (16 seconds)
+
+25. 1 minute 14 seconds (74 seconds)
+
+26. 0 minutes 33 seconds (33 seconds)
+
+27. 0 minutes 21 seconds (21 seconds)
+
+28. 0 minutes 25 seconds (25 seconds)
+
+29. 0 minutes 18 seconds (18 seconds)
+
+30. 0 minutes 14 seconds (14 seconds)
+
+```{r}
+# Vector of observed times in seconds
+
+faceid_delay_sec <- c(83, 54, 51, 66, 81, 42, 24, 38, 26, 31,
+                      52, 17, 48, 22, 10, 62, 26, 17, 12, 24,
+                      35, 27, 20, 16, 74, 33, 21, 25, 18, 14)
+
+
+# Calculate descriptive statistics
+
+avg_delay_sec <- mean(faceid_delay_sec)
+mins_component <- avg_delay_sec %/% 60
+secs_component <- avg_delay_sec %% 60
+
+
+# Model Parameter Calculation
+
+rate_lambda <- 1 / avg_delay_sec
+
+
+# Evaluate cumulative probability for t <= 30 seconds
+
+target_cutoff <- 30
+prob_within_cutoff <- pexp(target_cutoff, rate = rate_lambda)
+
+
+# Output summary to console
+
+cat(sprintf("Average Failure Duration: %d minute(s) and %.2f second(s)", mins_component, secs_component))
+cat(sprintf("Rate Parameter (lambda): %.4f per second", rate_lambda))
+cat(sprintf("Probability of resolving in <= 30 seconds: %.2f%%", prob_within_cutoff * 100))
+
+```
+
+
+**Analysis & Practical Applications**
+
+While occasional biometric recognition issues seem minor in isolation, their cumulative impact during peak morning hours creates substantial pedestrian congestion. Our field observations indicate that when a scanner fails, a student spends up to 83 seconds attempting position adjustments or requesting manual clearance from security staff.
+
+To mitigate these delays, administration should still implement a dual-authentication fallback—such (RFID tap card) and / or to take a new facial scan for those students who have trouble. These shall allow students to bypass stalled biometric turnstiles quickly.
+
+**Summary of Results**
+
+This investigation evaluated the operational impact of gate facial recognition errors across 30 sampled events. Standardizing all measurements into seconds yielded a sample mean ($\mu$) of 35.63 seconds per failed attempt. Fitting an exponential distribution model resulted in an estimated rate parameter $\lambda = 0.0281 \text{ s}^{-1}$. Using the cumulative distribution function (CDF), we determined that approximately 57.00% of failed entry attempts are cleared or abandoned within 30 seconds.
+
+
+```{r}
+# Re-assigning parameters for graphical plotting
+
+rate_param <- 1 / mean(faceid_delay_sec)
+
+
+# Constructing density histogram with theoretical overlay
+
+hist(faceid_delay_sec,
+     breaks = 9,
+     freq = FALSE,
+     col = "lightblue",
+     border = "white",
+     main = "Density Distribution of Face ID Entry Delays",
+     xlab = "Duration of Failed Attempt (Seconds)",
+     ylab = "Probability Density")
+
+
+# Adding theoretical Exponential PDF Curve
+
+curve(dexp(x, rate = rate_param),
+      from = 0,
+      to = max(faceid_delay_sec) + 10,
+      col = "darkred",
+      lwd = 2,
+      add = TRUE)
+
+
+# Legend positioning
+
+legend("topright",
+       legend = c("Observed Data", "Exponential Model"),
+       fill = c("lightblue", NA),
+       col = c(NA, "darkred"),
+       lwd = c(NA, 2),
+       bty = "n")
+```
